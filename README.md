@@ -1,2 +1,1 @@
-# StyleGAN-pytorch
-StyleGAN morphing faces
+# <center> Морфинг лиц посредством Style-Based Generative adversarial network
