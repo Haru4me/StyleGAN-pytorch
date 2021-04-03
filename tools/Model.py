@@ -413,11 +413,11 @@ class StyleDiscriminator(nn.Module):
 
             if i > 0 and i == step and 0 <= alpha < 1:
                 
-                skip = F.avg_pool2d(input, 2)
+                skip = F.avg_pool2d(img, 2)
                 skip = self.from_rgb[index + 1](skip)
-                out = (1 - alpha) * skip_rgb + alpha * out
+                out = (1 - alpha) * skip + alpha * out
         
-        out = self.linear(self.conval(out).squeeze(2).squeeze(2))
+        out = self.linear(torch.flatten(self.conval(out), start_dim=1, end_dim=3))
 
         return out
 
