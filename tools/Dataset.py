@@ -14,14 +14,10 @@ import pandas as pd
 
 class CelebA(Dataset):
     
-    def __init__(self, root='./data', split='train', transform=None):
-
+    def __init__(self, root='./data', transform=None):
+    
         df = pd.read_csv('{}/list_eval_partition.csv'.format(root))
 
-        if split == 'train':
-            df = df[df.partition == 0]
-        else:
-            df = df[df.partition != 0]
         index = np.random.permutation(len(df))
 
         self.root = root
