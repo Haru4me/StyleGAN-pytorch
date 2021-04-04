@@ -77,6 +77,7 @@ def train(G,
     phase = [0, 100, 200, 300, 400, num_epoch]
     step = -1
     size = [(8,8),(16,16),(32,32),(64,64),(128,128)]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     for epoch in pbar:
 
