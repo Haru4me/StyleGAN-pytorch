@@ -17,6 +17,7 @@ class PixelNorm(nn.Module):
         return x / torch.sqrt(torch.mean(x ** 2, dim=1, keepdim=True) + 1e-8)
 
 
+
 class EqualLR:
 
     def __init__(self, name):
