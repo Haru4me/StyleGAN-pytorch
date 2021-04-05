@@ -107,16 +107,17 @@ class MapNet(nn.Module):
 
 class AddNoise(nn.Module):
 
-    def __init__(self, inp_channel):
+    def __init__(self, inp_channel, device):
 
         super(AddNoise, self).__init__()
         self.weight = nn.Parameter(torch.zeros(1, inp_channel, 1, 1))
+        self.device = device
 
     def forward(self, x):
 
         size = list(x.size())
         size[1] = 1
-        noise = torch.randn(size)
+        noise = torch.randn(size).to(self.device)
 
         return x + self.weight * noise
 
@@ -185,7 +186,7 @@ class Blur(nn.Module):
 class StyleBlock(nn.Module):
 
     def __init__(self, in_channel, out_channel, kernel_size=3,
-                 padding=1, style_dim=512, upsample=False):
+                 padding=1, style_dim=512, upsample=False, device='cpu'):
 
         super(StyleBlock, self).__init__()
 
@@ -197,13 +198,13 @@ class StyleBlock(nn.Module):
         net.append(EqualConv2d(in_channel, out_channel,
                                kernel_size, padding=padding))
         net.append(Blur(out_channel))
-        net.append(equal_lr(AddNoise(out_channel)))
+        net.append(equal_lr(AddNoise(out_channel, device=device)))
 
         self.block1 = nn.Sequential(*net)
         self.A = AdaIN(out_channel, style_dim)
         self.block2 = nn.Sequential(
             EqualConv2d(out_channel, out_channel, kernel_size, padding=padding),
-            equal_lr(AddNoise(out_channel))
+            equal_lr(AddNoise(out_channel, device=device))
         )
 
     def forward(self, img, style):
@@ -253,11 +254,11 @@ class SynNet(nn.Module):
 
         self.styled = nn.ModuleList(
             [
-                StyleBlock(512, 512, 3, 1, upsample=True),  # 8
-                StyleBlock(512, 512, 3, 1, upsample=True),  # 16
-                StyleBlock(512, 512, 3, 1, upsample=True),  # 32
-                StyleBlock(512, 256, 3, 1, upsample=True),  # 64
-                StyleBlock(256, 128, 3, 1, upsample=True),  # 128
+                StyleBlock(512, 512, 3, 1, upsample=True, device=device),  # 8
+                StyleBlock(512, 512, 3, 1, upsample=True, device=device),  # 16
+                StyleBlock(512, 512, 3, 1, upsample=True, device=device),  # 32
+                StyleBlock(512, 256, 3, 1, upsample=True, device=device),  # 64
+                StyleBlock(256, 128, 3, 1, upsample=True, device=device),  # 128
             ]
         )
 
