@@ -245,9 +245,11 @@ class ConvBlock(nn.Module):
 
 class SynNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self, device='cpu'):
 
         super(SynNet, self).__init__()
+
+        self.device = device
 
         self.styled = nn.ModuleList(
             [
@@ -271,7 +273,7 @@ class SynNet(nn.Module):
 
     def forward(self, style, step=0, alpha=1, break_point=None):
 
-        out = torch.ones((style[0].shape[0], 512, 4, 4), dtype=torch.float)
+        out = torch.ones((style[0].shape[0], 512, 4, 4), dtype=torch.float, device=self.device)
 
         for i, conv in enumerate(self.styled):
             
@@ -316,11 +318,11 @@ MEANS = {
 
 class StyleGenerator(nn.Module):
 
-    def __init__(self):
+    def __init__(self, device='cpu'):
 
         super(StyleGenerator, self).__init__()
 
-        self.syntnet = SynNet()
+        self.syntnet = SynNet(device=device)
         self.mapnet = MapNet()
 
     def forward(self, latent, step=0, alpha=1, style_weight=0, 
