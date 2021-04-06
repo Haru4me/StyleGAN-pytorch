@@ -294,7 +294,6 @@ class SynNet(nn.Module):
                 out = self.to_rgb[i](out)
 
                 if i > 0 and 0 <= alpha < 1:
-                    print(prev.shape, out.shape)
                     skip = self.to_rgb[i-1](prev)
                     skip = F.interpolate(
                         skip, scale_factor=2, mode='nearest')
