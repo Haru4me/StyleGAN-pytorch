@@ -28,7 +28,7 @@ class WGANGP_D(nn.Module):
         
         loss = -real.mean() + gen.mean()
 
-        if self.penalty_type == 'grad':s
+        if self.penalty_type == 'grad':
             grad_real = grad(outputs=real.sum(),
                             inputs=img, create_graph=True)[0]
             penalty = (grad_real.view(grad_real.size(0),
