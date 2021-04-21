@@ -11,7 +11,7 @@ class WGANGP_G(nn.Module):
         super(WGANGP_G, self).__init__()
 
     def forward(self, preds):
-        return -preds.mean()
+        return F.softplus-preds).mean()
 
 
 class WGANGP_D(nn.Module):
@@ -26,7 +26,7 @@ class WGANGP_D(nn.Module):
 
     def forward(self, real, gen, img):
         
-        loss = -real.mean() + gen.mean()
+        loss = F.softplus(-real).mean() + F.softplus(gen).mean()
 
         if self.penalty_type == 'grad':
             grad_real = grad(outputs=real.sum(),
