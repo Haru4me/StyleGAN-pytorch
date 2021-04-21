@@ -17,7 +17,6 @@ class PixelNorm(nn.Module):
         return x / torch.sqrt(torch.mean(x ** 2, dim=1, keepdim=True) + 1e-8)
 
 
-
 class EqualLR:
 
     def __init__(self, name):
@@ -425,6 +424,110 @@ class StyleDiscriminator(nn.Module):
         return out
 
 
+
+"""
+    Pix2Pix PSP Mapping Network (f)
+"""
+
+
+class PSPMN(nn.Module):
+    
+    def __init__(self, bn_size=4, output_size=(1,2,4,8)):
+
+        super(PSPMN, self).__init__()
+
+        self.size = (8,8)
+
+        self.input_layer = nn.Sequential(
+            ConvBlock(3,512, 3),
+            PixelNorm(),
+            nn.LeakyReLU(0.2)
+        )
+
+        bottle = []
+
+        for i in range(bn_size-1):
+            bottle.append(
+                nn.Sequential(
+                    ConvBlock(512, 512, 3),
+                    PixelNorm(),
+                    nn.LeakyReLU(0.2)
+                )
+            )
+
+        self.bottle = nn.Sequential(*bottle)
+
+        self.output_layers = nn.ModuleList()
+
+        for i in output_size:
+            self.output_layers.append(nn.Sequential(
+                nn.AdaptiveAvgPool2d((i,i)),
+                ConvBlock(512, 512//4, 3))
+            )
+        
+        self.linear = nn.Sequential(
+            nn.Flatten(),
+            EqualLinear(512*self.size[0]*self.size[1],512)
+        )
+    
+    def forward(self, x: torch.Tensor):
+
+        x = self.input_layer(x)
+        x = self.bottle(x)
+        ppm = []
+
+        for m in self.output_layers:
+            ppm.append(F.interpolate(m(x), size=self.size))
+            
+        x = torch.cat(ppm, dim=1)
+        x =  self.linear(x)
+        
+        return x
+                
+
+"""
+    Pix2Pix PSP Styled Generator (G)
+"""
+
+
+class PSPStyleGenerator(nn.Module):
+
+    def __init__(self, device='cpu'):
+
+        super(StyleGenerator, self).__init__()
+
+        self.syntnet = SynNet(device=device)
+        self.mapnet = PSPMN()
+
+    def forward(self, latent, step=0, alpha=1, style_weight=0,
+                break_point=None, mean_way=None):
+
+        styles = []
+
+        if type(latent) not in (list, tuple):
+            latent = [latent]
+
+        for i in latent:
+            styles.append(self.mapnet(i))
+
+        if mean_way is not None:
+
+            styles_norm = []
+
+            for style in styles:
+
+                if mean_way == 'mean':
+                    mean_style = MEANS[mean_way](style, dim=0, keepdim=True)
+                else:
+                    mean_style = MEANS[mean_way](
+                        style, dim=0, keepdim=True).values
+
+                styles_norm.append(
+                    mean_style + style_weight * (style - mean_style))
+
+            styles = styles_norm
+
+        return self.syntnet(styles, step=step, alpha=alpha, break_point=break_point)
 
 
 
