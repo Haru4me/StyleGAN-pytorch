@@ -494,7 +494,7 @@ class PSPStyleGenerator(nn.Module):
 
     def __init__(self, device='cpu'):
 
-        super(StyleGenerator, self).__init__()
+        super(PSPStyleGenerator, self).__init__()
 
         self.syntnet = SynNet(device=device)
         self.mapnet = PSPMN()
