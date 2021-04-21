@@ -11,7 +11,7 @@ class WGANGP_G(nn.Module):
         super(WGANGP_G, self).__init__()
 
     def forward(self, preds):
-        return F.softplus-preds).mean()
+        return F.softplus(-preds).mean()
 
 
 class WGANGP_D(nn.Module):
