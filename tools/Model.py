@@ -439,7 +439,7 @@ class PSPMN(nn.Module):
         self.size = (8,8)
 
         self.input_layer = nn.Sequential(
-            ConvBlock(3,512, 3),
+            EqualConv2d(3, 512, 3, padding=1),
             PixelNorm(),
             nn.LeakyReLU(0.2)
         )
@@ -449,7 +449,7 @@ class PSPMN(nn.Module):
         for i in range(bn_size-1):
             bottle.append(
                 nn.Sequential(
-                    ConvBlock(512, 512, 3),
+                    EqualConv2d(512, 512, 3, padding=1, stride=2),
                     PixelNorm(),
                     nn.LeakyReLU(0.2)
                 )
@@ -462,13 +462,14 @@ class PSPMN(nn.Module):
         for i in output_size:
             self.output_layers.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d((i,i)),
-                ConvBlock(512, 512//4, 3))
+                EqualConv2d(512, 512//4, 3, padding=1))
             )
-        
-        self.linear = nn.Sequential(
-            nn.Flatten(),
-            EqualLinear(512*self.size[0]*self.size[1],512)
+
+        self.map2style = nn.Sequential(
+            EqualConv2d(512, 512, 3, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
         )
+
     
     def forward(self, x: torch.Tensor):
 
@@ -480,9 +481,10 @@ class PSPMN(nn.Module):
             ppm.append(F.interpolate(m(x), size=self.size))
             
         x = torch.cat(ppm, dim=1)
-        x =  self.linear(x)
-        
-        return x
+        x = self.map2style(x)
+        x = self.map2style(x)
+        x = self.map2style(x)
+        return nn.Flatten()(x)
                 
 
 """
