@@ -322,7 +322,7 @@ class StyleGenerator(nn.Module):
         super(StyleGenerator, self).__init__()
 
         self.syntnet = SynNet(device=device)
-        self.mapnet = MapNet()
+        self.mapnet = MapNet(num=8)
 
     def forward(self, latent, step=0, alpha=1, style_weight=0, 
                 break_point=None, mean_way=None):
