@@ -83,7 +83,7 @@ class EqualLinear(nn.Module):
 
 class MapNet(nn.Module):
 
-    def __init__(self, inp=512, num=6, alpha=0.2):
+    def __init__(self, inp=512, num=8, alpha=0.2):
 
         super(MapNet, self).__init__()
 
@@ -532,4 +532,4 @@ class PSPStyleGenerator(nn.Module):
         return self.syntnet(styles, step=step, alpha=alpha, break_point=break_point)
 
 
-
+"""!!!!TODO: СДЕЛАТЬ StyleGenerator общим с входом mapnet: nn.Module!!!!!!"""
