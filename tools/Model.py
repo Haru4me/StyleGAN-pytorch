@@ -273,7 +273,7 @@ class SynNet(nn.Module):
 
     def forward(self, style, step=0, alpha=1, break_point=None):
 
-        out = torch.randn((style[0].shape[0], 512, 4, 4),
+        out = torch.ones((style[0].shape[0], 512, 4, 4),
                           dtype=torch.float, device=self.device)
 
         for i, conv in enumerate(self.styled):
